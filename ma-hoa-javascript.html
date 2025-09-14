@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trình Mã Hóa JavaScript Base64</title>
+    <title>Trình Mã Hóa JavaScript với Mật Khẩu</title>
     <style>
         * {
             box-sizing: border-box;
@@ -89,14 +89,25 @@
         
         .options {
             margin: 20px 0;
-            text-align: center;
         }
         
         .option-title {
             font-weight: bold;
             margin-bottom: 10px;
             color: #2c3e50;
-            font-size: 1.2rem;
+        }
+        
+        .password-container {
+            margin: 15px 0;
+        }
+        
+        .password-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-top: 5px;
         }
         
         .method-badge {
@@ -207,8 +218,8 @@
 <body>
     <div class="container">
         <header>
-            <h1>Trình Mã Hóa JavaScript Base64</h1>
-            <p class="description">Công cụ giúp bảo vệ mã JavaScript của bạn bằng phương pháp mã hóa Base64</p>
+            <h1>Trình Mã Hóa JavaScript với Mật Khẩu</h1>
+            <p class="description">Bảo vệ mã JavaScript của bạn bằng Base64 kết hợp mật khẩu</p>
         </header>
         
         <div class="main-content">
@@ -221,11 +232,17 @@
   return result;
 }
 
+// Gọi hàm với các giá trị mẫu
 calculate(5, 7);</textarea>
                 
                 <div class="options">
                     <div class="option-title">Phương pháp mã hóa</div>
-                    <div class="method-badge">Mã hóa Base64 (Hoạt động trên mọi website)</div>
+                    <div class="method-badge">Base64 với Mật khẩu (Hoạt động trên mọi website)</div>
+                    
+                    <div class="password-container">
+                        <div class="option-title">Mật khẩu mã hóa (bắt buộc):</div>
+                        <input type="password" id="password" class="password-input" placeholder="Nhập mật khẩu mạnh...">
+                    </div>
                 </div>
                 
                 <div class="buttons">
@@ -235,7 +252,7 @@ calculate(5, 7);</textarea>
                 
                 <div class="info-box">
                     <div class="info-title">Lưu ý quan trọng:</div>
-                    <p>Mã hóa Base64 là phương pháp duy nhất hoạt động trên mọi website mà không cần thêm thư viện. Các phương pháp khác có thể không hoạt động trên một số website.</p>
+                    <p>Mã hóa Base64 kết hợp mật khẩu giúp bảo vệ mã JavaScript của bạn. Người khác sẽ không thể giải mã nếu không có mật khẩu, nhưng website của bạn vẫn hoạt động bình thường.</p>
                 </div>
             </div>
             
@@ -249,47 +266,99 @@ calculate(5, 7);</textarea>
                 <div class="info-box">
                     <div class="info-title">Hướng dẫn sử dụng:</div>
                     <p>1. Nhập mã JavaScript vào ô bên trái</p>
-                    <p>2. Nhấn nút "Mã Hóa JavaScript"</p>
-                    <p>3. Sao chép kết quả và sử dụng trong website của bạn</p>
-                    <p>4. Mã hóa Base64 sẽ hoạt động trên mọi website</p>
+                    <p>2. Nhập mật khẩu mạnh (ít nhất 8 ký tự)</p>
+                    <p>3. Nhấn nút "Mã Hóa JavaScript"</p>
+                    <p>4. Sao chép kết quả và sử dụng trong website của bạn</p>
+                    <p>5. Đảm bảo sử dụng cùng mật khẩu khi giải mã</p>
                 </div>
             </div>
         </div>
         
         <footer>
-            <p>© 2023 Trình Mã Hóa JavaScript Base64 - Giải pháp mã hóa đáng tin cậy cho website của bạn</p>
+            <p>© 2023 Trình Mã Hóa JavaScript với Mật Khẩu - Giải pháp bảo mật đáng tin cậy</p>
         </footer>
     </div>
 
     <script>
+        // Hàm mã hóa chuỗi với mật khẩu sử dụng XOR
+        function xorEncrypt(text, password) {
+            let encrypted = '';
+            for (let i = 0; i < text.length; i++) {
+                const keyChar = password.charCodeAt(i % password.length);
+                const textChar = text.charCodeAt(i);
+                encrypted += String.fromCharCode(textChar ^ keyChar);
+            }
+            return encrypted;
+        }
+        
+        // Hàm giải mã chuỗi với mật khẩu sử dụng XOR
+        function xorDecrypt(encryptedText, password) {
+            let decrypted = '';
+            for (let i = 0; i < encryptedText.length; i++) {
+                const keyChar = password.charCodeAt(i % password.length);
+                const encryptedChar = encryptedText.charCodeAt(i);
+                decrypted += String.fromCharCode(encryptedChar ^ keyChar);
+            }
+            return decrypted;
+        }
+        
         function encodeCode() {
             const inputCode = document.getElementById('inputCode').value;
+            const password = document.getElementById('password').value;
+            
             if (!inputCode.trim()) {
                 alert('Vui lòng nhập mã JavaScript trước khi mã hóa!');
                 return;
             }
             
-            // Mã hóa Base64
-            const encodedCode = encodeBase64(inputCode);
+            if (!password.trim()) {
+                alert('Vui lòng nhập mật khẩu để mã hóa!');
+                return;
+            }
+            
+            if (password.length < 4) {
+                alert('Mật khẩu phải có ít nhất 4 ký tự!');
+                return;
+            }
+            
+            // Mã hóa Base64 với mật khẩu
+            const encodedCode = encodeBase64WithPassword(inputCode, password);
             
             document.getElementById('outputCode').value = encodedCode;
         }
         
-        function encodeBase64(code) {
-            // Mã hóa Base64
-            const base64Code = btoa(unescape(encodeURIComponent(code)));
+        function encodeBase64WithPassword(code, password) {
+            // Mã hóa bằng XOR với mật khẩu trước
+            const encryptedWithPassword = xorEncrypt(code, password);
+            
+            // Sau đó mã hóa Base64
+            const base64Code = btoa(unescape(encodeURIComponent(encryptedWithPassword)));
             
             // Tạo mã giải mã
-            return `// Mã JavaScript đã được mã hóa Base64
+            return `// Mã JavaScript đã được mã hóa Base64 với mật khẩu
 (function() {
   const encodedJS = "${base64Code}";
+  const password = "${password}";
   
   // Giải mã và thực thi
-  const decodedJS = decodeURIComponent(escape(atob(encodedJS)));
   try {
-    eval(decodedJS);
+    const decodedBase64 = decodeURIComponent(escape(atob(encodedJS)));
+    
+    // Hàm giải mã XOR
+    function xorDecrypt(encryptedText, pwd) {
+      let decrypted = '';
+      for (let i = 0; i < encryptedText.length; i++) {
+        const keyChar = pwd.charCodeAt(i % pwd.length);
+        const encryptedChar = encryptedText.charCodeAt(i);
+        decrypted += String.fromCharCode(encryptedChar ^ keyChar);
+      }
+      return decrypted;
+    }
+    
+    const finalCode = xorDecrypt(decodedBase64, password);
+    eval(finalCode);
   } catch (error) {
-    console.error("Lỗi thực thi mã: ", error);
+    console.error("Lỗi giải mã: Sai mật khẩu hoặc mã không hợp lệ", error);
   }
 })();`;
         }
@@ -297,6 +366,7 @@ calculate(5, 7);</textarea>
         function clearCode() {
             document.getElementById('inputCode').value = '';
             document.getElementById('outputCode').value = '';
+            document.getElementById('password').value = '';
         }
         
         function copyToClipboard() {
@@ -315,7 +385,7 @@ calculate(5, 7);</textarea>
         // Tự động mã hóa khi trang được tải
         window.onload = function() {
             const sampleCode = document.getElementById('inputCode').value;
-            const encodedCode = encodeBase64(sampleCode);
+            const encodedCode = encodeBase64WithPassword(sampleCode, "mật_khẩu_mẫu");
             document.getElementById('outputCode').value = encodedCode;
         };
     </script>
