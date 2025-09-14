@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trình Giải Mã Base64</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(90deg, #3498db, #2c3e50);
+            color: white;
+            text-align: center;
+            padding: 25px 20px;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .description {
+            font-size: 1rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .main-content {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 20px;
+        }
+        
+        .input-section, .output-section {
+            flex: 1;
+            min-width: 300px;
+            padding: 20px;
+        }
+        
+        .section-title {
+            font-size: 1.3rem;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+        }
+        
+        textarea {
+            width: 100%;
+            height: 200px;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        
+        .options {
+            margin: 20px 0;
+        }
+        
+        .option-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        
+        .password-container {
+            margin: 15px 0;
+            display: none;
+        }
+        
+        .password-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-top: 5px;
+        }
+        
+        .method-badge {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .decode-btn {
+            background: linear-gradient(90deg, #3498db, #2980b9);
+            color: white;
+            flex: 2;
+        }
+        
+        .decode-btn:hover {
+            background: linear-gradient(90deg, #2980b9, #2573a7);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .clear-btn {
+            background: linear-gradient(90deg, #e74c3c, #c0392b);
+            color: white;
+            flex: 1;
+        }
+        
+        .clear-btn:hover {
+            background: linear-gradient(90deg, #c0392b, #a93226);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .output {
+            position: relative;
+        }
+        
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 8px 15px;
+            background: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        
+        .copy-btn:hover {
+            background: #27ae60;
+        }
+        
+        .info-box {
+            background: #f8f9fa;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 0 5px 5px 0;
+        }
+        
+        .info-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        
+        .detected-type {
+            margin: 10px 0;
+            padding: 8px;
+            background: #e8f4fc;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            background: #f8f9fa;
+            border-top: 1px solid #ddd;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Trình Giải Mã Base64</h1>
+            <p class="description">Công cụ giải mã chuỗi Base64 thành văn bản, JavaScript hoặc mã HTML gốc</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="input-section">
+                <h2 class="section-title">Chuỗi Base64 cần giải mã</h2>
+                <textarea id="inputCode" placeholder="Nhập hoặc dán chuỗi Base64 của bạn vào đây...">ZnVuY3Rpb24gY2FsY3VsYXRlKGEsIGIpIHsKICAvLyBIw6BtIHRpbmggdMSDbmcgaGFpIHPDtAogIGNvbnN0IHJlc3VsdCA9IGEgKyBiOwogIGNvbnNvbGUubG9nKCJL4bq9dCBxdeG7kSA6ICIgKyByZXN1bHQpOwogIHJldHVybiByZXN1bHQ7Cn0KCi8vIEfhuqNwIGjDoG0gduG7mWMgY8OhYyBnaSDEkcOieSBt4bqhbgpjYWxjdWxhdGUoNSwgNyk7</textarea>
+                
+                <div class="options">
+                    <div class="option-title">Phương pháp giải mã</div>
+                    <div class="method-badge">Giải mã Base64</div>
+                </div>
+                
+                <div class="buttons">
+                    <button class="decode-btn" onclick="decodeCode()">Giải Mã Base64</button>
+                    <button class="clear-btn" onclick="clearCode()">Xóa Mã</button>
+                </div>
+                
+                <div id="detectedType" class="detected-type">
+                    <strong>Phát hiện:</strong> <span id="typeInfo">JavaScript code</span>
+                </div>
+                
+                <div class="info-box">
+                    <div class="info-title">Lưu ý quan trọng:</div>
+                    <p>Trình giải mã Base64 này có thể giải mã bất kỳ chuỗi Base64 nào thành nội dung gốc. Nếu chuỗi Base64 được mã hóa với mật khẩu, bạn sẽ cần mật khẩu để giải mã.</p>
+                </div>
+            </div>
+            
+            <div class="output-section">
+                <h2 class="section-title">Kết quả giải mã</h2>
+                <div class="output">
+                    <textarea id="outputCode" readonly placeholder="Kết quả giải mã sẽ xuất hiện ở đây..."></textarea>
+                    <button class="copy-btn" onclick="copyToClipboard()">Sao chép</button>
+                </div>
+                
+                <div class="info-box">
+                    <div class="info-title">Hướng dẫn sử dụng:</div>
+                    <p>1. Nhập hoặc dán chuỗi Base64 vào ô bên trái</p>
+                    <p>2. Nhấn nút "Giải Mã Base64"</p>
+                    <p>3. Xem kết quả giải mã trong ô bên phải</p>
+                    <p>4. Sao chép kết quả nếu cần</p>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>© 2023 Trình Giải Mã Base64 - Công cụ hữu ích cho nhà phát triển</p>
+        </footer>
+    </div>
+
+    <script>
+        function decodeCode() {
+            const inputCode = document.getElementById('inputCode').value.trim();
+            if (!inputCode) {
+                alert('Vui lòng nhập chuỗi Base64 trước khi giải mã!');
+                return;
+            }
+            
+            try {
+                // Giải mã Base64
+                const decodedCode = decodeBase64(inputCode);
+                
+                // Hiển thị kết quả
+                document.getElementById('outputCode').value = decodedCode;
+                
+                // Phát hiện loại nội dung
+                detectContentType(decodedCode);
+            } catch (error) {
+                document.getElementById('outputCode').value = "Lỗi: Chuỗi Base64 không hợp lệ!\n\nChi tiết lỗi: " + error.message;
+                document.getElementById('detectedType').style.display = 'none';
+            }
+        }
+        
+        function decodeBase64(base64String) {
+            // Giải mã Base64
+            try {
+                // Thử giải mã thông thường
+                return decodeURIComponent(escape(atob(base64String)));
+            } catch (e) {
+                // Nếu không thành công, thử giải mã mà không escape
+                try {
+                    return atob(base64String);
+                } catch (e2) {
+                    throw new Error("Chuỗi Base64 không hợp lệ");
+                }
+            }
+        }
+        
+        function detectContentType(content) {
+            const detectedType = document.getElementById('detectedType');
+            const typeInfo = document.getElementById('typeInfo');
+            
+            // Kiểm tra xem nội dung là JavaScript
+            if (content.includes('function') || content.includes('const ') || 
+                content.includes('let ') || content.includes('var ') || 
+                content.includes('console.log') || content.includes('eval')) {
+                typeInfo.textContent = 'JavaScript code';
+                detectedType.style.display = 'block';
+                return;
+            }
+            
+            // Kiểm tra xem nội dung là HTML
+            if (content.includes('<html') || content.includes('<body') || 
+                content.includes('<div') || content.includes('<p') || 
+                content.includes('<span') || content.includes('<head')) {
+                typeInfo.textContent = 'HTML code';
+                detectedType.style.display = 'block';
+                return;
+            }
+            
+            // Kiểm tra xem nội dung là CSS
+            if (content.includes('{') && content.includes('}') && 
+                (content.includes('color') || content.includes('font') || 
+                 content.includes('padding') || content.includes('margin'))) {
+                typeInfo.textContent = 'CSS code';
+                detectedType.style.display = 'block';
+                return;
+            }
+            
+            // Kiểm tra xem nội dung là JSON
+            if ((content.startsWith('{') && content.endsWith('}')) || 
+                (content.startsWith('[') && content.endsWith(']'))) {
+                try {
+                    JSON.parse(content);
+                    typeInfo.textContent = 'JSON data';
+                    detectedType.style.display = 'block';
+                    return;
+                } catch (e) {
+                    // Không phải JSON hợp lệ
+                }
+            }
+            
+            // Mặc định là văn bản thuần
+            typeInfo.textContent = 'Plain text';
+            detectedType.style.display = 'block';
+        }
+        
+        function clearCode() {
+            document.getElementById('inputCode').value = '';
+            document.getElementById('outputCode').value = '';
+            document.getElementById('detectedType').style.display = 'none';
+        }
+        
+        function copyToClipboard() {
+            const outputCode = document.getElementById('outputCode');
+            if (!outputCode.value.trim()) {
+                alert('Không có nội dung để sao chép!');
+                return;
+            }
+            
+            outputCode.select();
+            document.execCommand('copy');
+            
+            alert('Đã sao chép kết quả giải mã vào clipboard!');
+        }
+        
+        // Tự động giải mã khi trang được tải
+        window.onload = function() {
+            decodeCode();
+        };
+    </script>
+</body>
+</html>
